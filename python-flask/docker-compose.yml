@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  reports:
+    image: example-flask-web-application
+    build: .
+    environment:
+      - APP_DEBUG=${APP_DEBUG}
+      - APP_KEY=${APP_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    ports:
+      - "3000:3000"
+    container_name: example-flask-web-application
+    restart: unless-stopped
