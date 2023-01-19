@@ -1,6 +1,7 @@
 import os
+import bcrypt
 from dotenv import load_dotenv
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from flask import Flask, render_template
 from flask import jsonify, request, send_from_directory
 from flask_jwt_extended import JWTManager
@@ -9,30 +10,35 @@ from flask_jwt_extended import jwt_required, create_access_token, set_access_coo
 from waitress import serve
 from werkzeug.utils import secure_filename
 
-from app.model import db
+from app.model import db, User
 from app.seeder import Seeder
 
-app = Flask(__name__, template_folder='template', static_folder='template/assets')
+def create_app():
+    app = Flask(__name__, template_folder='template', static_folder='template/assets')
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config["JWT_COOKIE_SECURE"] = False
-app.config["JWT_CSRF_METHODS"] = ["PUT", "PATCH", "DELETE"]
-app.config["JWT_TOKEN_LOCATION"] = ["cookies", "headers"]
-app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=12)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config["JWT_COOKIE_SECURE"] = False
+    app.config["JWT_CSRF_METHODS"] = ["PUT", "PATCH", "DELETE"]
+    app.config["JWT_TOKEN_LOCATION"] = ["cookies", "headers"]
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=12)
 
-db.init_app(app)
+    db.init_app(app)
+
+    with app.app_context():
+        print("Drop Database.........")
+        db.drop_all()
+        print("Init Database.........")
+        db.create_all()
+        print("Init Data Seed.........")
+        Seeder.seedData()
+        print("DataSeeded.........")
+    return app
+
+app = create_app()
+
 jwt = JWTManager(app)
-
-with app.app_context():
-    print("Drop Database.........")
-    db.drop_all()
-    print("Init Database.........")
-    db.create_all()
-    print("Init Data Seed.........")
-    Seeder.seedData()
-    print("DataSeeded.........")
 
 @jwt.unauthorized_loader
 def my_unauthorized_callback(temp):
