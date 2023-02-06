@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 
 from app.model import db, User
 from app.seeder import Seeder
+from gemini_self_protector import GeminiManager
 
 def create_app():
     app = Flask(__name__, template_folder='template', static_folder='template/assets')
@@ -37,6 +38,8 @@ def create_app():
     return app
 
 app = create_app()
+
+gemini = GeminiManager(license_key=os.getenv("GEMINI_LICENSE_KEY"), protect_mode=os.getenv("GEMINI_GLOBAL_PROTECT_MODE"))
 
 jwt = JWTManager(app)
 
@@ -71,10 +74,12 @@ def refresh_expiring_jwts(response):
         return response
 
 @app.route('/')
+@gemini.flask_protect_extended()
 def index():
     return render_template('index.html')
 
 @app.route('/api/login', methods=['POST'])
+@gemini.flask_protect_extended(protect_mode='monitor')
 def login():
     username = request.json['username']
     password = request.json['password']

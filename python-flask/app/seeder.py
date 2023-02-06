@@ -3,7 +3,7 @@ import bcrypt
 from app.model import User
 from app.model import db
 
-salt = bcrypt.gensalt()
+salt = bcrypt.gensalt(10)
 
 class Seeder():
     def seedData():
