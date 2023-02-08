@@ -39,7 +39,7 @@ def create_app():
 
 app = create_app()
 
-gemini = GeminiManager(license_key=os.getenv("GEMINI_LICENSE_KEY"), protect_mode=os.getenv("GEMINI_GLOBAL_PROTECT_MODE"))
+gemini = GeminiManager(app, license_key=os.getenv("GEMINI_LICENSE_KEY"), protect_mode=os.getenv("GEMINI_GLOBAL_PROTECT_MODE"), sensitive_value=os.getenv("GEMINI_SENSITIVE_VALUE"))
 
 jwt = JWTManager(app)
 
@@ -79,7 +79,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/api/login', methods=['POST'])
-@gemini.flask_protect_extended(protect_mode='monitor')
+@gemini.flask_protect_extended(protect_mode='block')
 def login():
     username = request.json['username']
     password = request.json['password']
