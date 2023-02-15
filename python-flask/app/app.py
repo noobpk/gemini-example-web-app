@@ -39,7 +39,7 @@ def create_app():
 
 app = create_app()
 
-gemini = GeminiManager(app, license_key=os.getenv("GEMINI_LICENSE_KEY"), protect_mode=os.getenv("GEMINI_GLOBAL_PROTECT_MODE"), sensitive_value=os.getenv("GEMINI_SENSITIVE_VALUE"))
+gemini = GeminiManager(app, license_key=os.getenv("GEMINI_LICENSE_KEY"))
 
 jwt = JWTManager(app)
 
