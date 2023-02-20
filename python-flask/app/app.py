@@ -2,7 +2,7 @@ import os
 import bcrypt
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for, session
 from flask import jsonify, request, send_from_directory
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended import jwt_required, create_access_token, set_access_cookies, get_jwt, get_jwt_identity, \
@@ -76,11 +76,14 @@ def refresh_expiring_jwts(response):
 @app.route('/')
 @gemini.flask_protect_extended()
 def index():
-    return render_template('index.html')
+    if session.get('gemini_example_web_flask_logged_in'):
+        return render_template('index.html')
+    else:
+        return redirect(url_for('web_login'))
 
 @app.route('/api/login', methods=['POST'])
-@gemini.flask_protect_extended(protect_mode='block')
-def login():
+@gemini.flask_protect_extended(protect_mode='monitor')
+def api_login():
     username = request.json['username']
     password = request.json['password']
     check_username = User.query.filter_by(username=username).first()
@@ -104,6 +107,27 @@ def login():
             "status": "Fail",
             "message": "Incorrect Username or Password"
             }), 401
+
+@app.route('/login', methods=['GET', 'POST'])
+def web_login():
+    if request.method == 'GET' and session.get('gemini_example_web_flask_logged_in'):
+        return redirect(url_for('index'))
+    elif request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if username == 'gemini' and password == 'gemini':
+            session['gemini_example_web_flask_logged_in'] = True
+            return redirect(url_for('index'))
+        else:
+            return render_template('login.html', error="Incorrect Username / Password")
+    else:
+        return render_template('login.html')
+
+@app.route('/logout', methods=['GET', 'POST'])
+def web_logout():
+    session['gemini_example_web_flask_logged_in'] = False
+    return redirect(url_for('web_login'))
 
 # Run production
 if app.config.get("ENV") == "production":

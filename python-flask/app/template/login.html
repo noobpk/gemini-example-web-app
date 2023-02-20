@@ -88,7 +88,6 @@
                   </svg>
                 </a>
               </li>
-              <a href="{{url_for('web_logout')}}"> Logout </a>
             </ul>
           </div>
         </nav>
@@ -100,15 +99,30 @@
         <div class="container">
           <div class="row">
             <div class="col-lg-8">
-              <h5 class="has-line">Welcome</h5>
-              <h1>Example Flask Web Application</h1>
-              <h2>Protect by Gemini Self-Protector</h2>
-              <!-- <form action="#">
-              <div class="form-group">
-                <input type="email" placeholder="Enter your email" />
-                <button type="submit">Notify Me</button>
-              </div>
-            </form> -->
+              <h5 class="has-line">Gemini Login</h5>
+              <h2>Login with gemin/gemini</h2>
+              <h5>Protect by Gemini Self-Protector</h5>
+              <form method="POST" action="{{url_for('web_login')}}">
+                <div class="form-group">
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Enter your username"
+                    value="gemini"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    value="gemini"
+                    required
+                  />
+                  <button type="submit">Login</button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
