@@ -9,6 +9,7 @@ from flask_jwt_extended import jwt_required, create_access_token, set_access_coo
     unset_jwt_cookies, current_user
 from waitress import serve
 from werkzeug.utils import secure_filename
+import json
 
 from app.model import db, User
 from app.seeder import Seeder
@@ -82,7 +83,7 @@ def index():
         return redirect(url_for('web_login'))
 
 @app.route('/api/login', methods=['POST'])
-@gemini.flask_protect_extended(protect_mode='monitor')
+@gemini.flask_protect_extended(protect_mode='block')
 def api_login():
     username = request.json['username']
     password = request.json['password']
@@ -109,22 +110,28 @@ def api_login():
             }), 401
 
 @app.route('/login', methods=['GET', 'POST'])
+@gemini.flask_protect_extended(protect_mode='monitor')
 def web_login():
     if request.method == 'GET' and session.get('gemini_example_web_flask_logged_in'):
         return redirect(url_for('index'))
     elif request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        _redirect = request.form['redirect']
+
+        data = request.values.to_dict()
+        data_str = json.dumps(data)
 
         if username == 'gemini' and password == 'gemini':
             session['gemini_example_web_flask_logged_in'] = True
-            return redirect(url_for('index'))
+            return redirect(_redirect)
         else:
             return render_template('login.html', error="Incorrect Username / Password")
     else:
         return render_template('login.html')
 
 @app.route('/logout', methods=['GET', 'POST'])
+@gemini.flask_protect_extended(protect_mode='monitor')
 def web_logout():
     session['gemini_example_web_flask_logged_in'] = False
     return redirect(url_for('web_login'))
